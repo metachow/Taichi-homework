@@ -13,6 +13,8 @@ m_2 = 1.0  #mass of the second pendulum
 delta = 0.01  #offset of initial position
 scaler = 1.0
 
+paused = True
+
 h = 1e-2
 substepping = 100
 center = ti.Vector([0.5, 0.5])
@@ -31,7 +33,7 @@ def initialize():
     for i in range(N):
         ang[i] = ang_0 + ti.Vector([0, -delta*i/N])
         origin[i] = center
-
+        v_ang[i] *= 0.0
 
 @ti.kernel
 def set_pos():
@@ -52,7 +54,7 @@ def update():
     for i in range(N):
         v_ang[i] += a_ang[i] * dt
         ang[i] += v_ang[i] *dt
-        # ang[i] %= 2*pi #Prevent value overflow after rotating a while
+        # ang[i] %= 2*pi #Prevent value overflow after run a while
 
 initialize()
 set_pos()
@@ -61,10 +63,22 @@ gui = ti.GUI('Double Pendulum', res)
 
 while gui.running:
 # for i in range(100):
-    for i in range(substepping):
-        compute()
-        update()   
-    set_pos()
+    for e in gui.get_events(ti.GUI.PRESS):
+        if e.key == ti.GUI.ESCAPE:
+            exit()
+        elif e.key == ti.GUI.SPACE:
+            paused = not paused
+            print('Pause status:',{paused})
+        elif e.key == 'r':
+            print('Reset pendulum position and velocity')
+            initialize()
+            set_pos()
+    
+    if not paused:
+            for i in range(substepping):
+                compute()
+                update()   
+            set_pos()
     gui.clear(0x112F41)
     gui.lines(origin.to_numpy(), pos_1.to_numpy(), color=0x068587, radius = 1)
     gui.lines(pos_1.to_numpy(), pos_2.to_numpy(), color=0x068587, radius = 1)

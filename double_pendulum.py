@@ -68,7 +68,7 @@ while gui.running:
             exit()
         elif e.key == ti.GUI.SPACE:
             paused = not paused
-            print('Pause status:',{paused})
+            print('Pause status:{}'.format(paused))
         elif e.key == 'r':
             print('Reset pendulum position and velocity')
             initialize()

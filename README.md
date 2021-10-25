@@ -7,6 +7,7 @@
 --Wikipedia
 
 双摆的基本结构如图
+
 ![double pendulum](./data/dbl_pendulum.gif)
 
 

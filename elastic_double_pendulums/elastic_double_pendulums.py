@@ -7,7 +7,7 @@ res = 512
 # 1: symplectic euler
 method = 1
 
-N = 3
+N = 10
 
 g = 9.8
 pi = 3.141592653

@@ -8,7 +8,17 @@
 
 ## 成功效果展示
 
-Todo
+N = 3
+
+![elastic pendulums](./data/elastic_3.gif)
+
+N = 5
+
+![elastic pendulums](./data/elastic_5.gif)
+
+N = 100
+
+![elastic pendulums](./data/elastic_100.gif)
 
 Tip: 不要把杨氏模量调得太大,否则质点在经过一些极值点的时候能量突变, 双摆系统会炸掉
 

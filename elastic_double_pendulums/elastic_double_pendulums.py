@@ -3,7 +3,11 @@ ti.init(ti.cuda)
 
 res = 512
 
-N = 10
+# integration method
+# 1: symplectic euler
+method = 1
+
+N = 3
 
 g = 9.8
 pi = 3.141592653
@@ -11,7 +15,7 @@ l_1 = 0.2
 l_2 = 0.2
 m_1 = 1.0
 m_2 = 1.0
-delta = pi
+delta = pi*2
 YoungsModulus = ti.field(ti.f32, ())
 
 h = 1.0
@@ -25,8 +29,8 @@ center = ti.Vector([0.5, 0.5])
 origin = ti.Vector.field(2, ti.f32,N)
 pos_1 = ti.Vector.field(2, ti.f32, N)
 pos_2 = ti.Vector.field(2, ti.f32, N)
-vec_1 = ti.Vector.field(2, ti.f32, N)
-vec_2 = ti.Vector.field(2, ti.f32, N)
+vel_1 = ti.Vector.field(2, ti.f32, N)
+vel_2 = ti.Vector.field(2, ti.f32, N)
 acc_1 = ti.Vector.field(2, ti.f32, N)
 acc_2 = ti.Vector.field(2, ti.f32, N)
 grad_1 = ti.Vector.field(2, ti.f32, N)
@@ -39,8 +43,8 @@ def initialize():
         origin[i] = ti.Vector([0.5, 0.5])
         pos_1[i] = center + ti.Vector([l_1 * ti.sin(pi), -l_1 * ti.cos(pi)])
         pos_2[i] = pos_1[i] + ti.Vector([l_2 * ti.sin(pi - delta*i/N), -l_2 * ti.cos(pi - delta*i/N)])
-        vec_1[i] *= 0
-        vec_2[i] *= 0
+        vel_1[i] *= 0
+        vel_2[i] *= 0
         acc_1[i] *= 0
         acc_2[i] *= 0
 
@@ -75,14 +79,15 @@ def compute_gradient():
 @ti.kernel
 def update():
     for i in range(N):
-        acc_1[i] = -grad_1[i]/m_2 - ti.Vector([0.0, g])
-        acc_2[i] = -grad_2[i]/m_2 - ti.Vector([0.0, g])
-        
-        vec_1[i] += dh * acc_1[i]
-        vec_2[i] += dh * acc_2[i]
+        if method == 1:
+            acc_1[i] = -grad_1[i]/m_1 - ti.Vector([0.0, g])
+            acc_2[i] = -grad_2[i]/m_2 - ti.Vector([0.0, g])
 
-        pos_1[i] += dh * vec_1[i]
-        pos_2[i] += dh * vec_2[i]
+            vel_1[i] += dh * acc_1[i]
+            vel_2[i] += dh * acc_2[i]
+
+            pos_1[i] += dh * vel_1[i]
+            pos_2[i] += dh * vel_2[i]
 
 initialize()
 
@@ -102,11 +107,11 @@ while gui.running:
             initialize()
     
     if not paused:
-        gui.text(content="Running - SPACE to pause", pos=(0.35, 0.95), color=0xFFFFFF)
+        # gui.text(content="Running - SPACE to pause", pos=(0.35, 0.98), color=0x00ff00)
         compute_gradient()
         update()
-    else:
-        gui.text(content="Pause - SPACE to resume", pos=(0.35, 0.95), color=0xFFFFFF)
+    # else:
+        # gui.text(content="Pause - SPACE to resume", pos=(0.35, 0.98), color=0xFF0000)
     
     gui.lines(origin.to_numpy(),pos_1.to_numpy(), color=0x068587, radius = 1)
     gui.lines(pos_1.to_numpy(),pos_2.to_numpy(), color=0x068587, radius = 1)

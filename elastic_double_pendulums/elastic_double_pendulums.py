@@ -15,7 +15,7 @@ l_1 = 0.2
 l_2 = 0.2
 m_1 = 1.0
 m_2 = 1.0
-delta = pi*2
+delta = pi
 YoungsModulus = ti.field(ti.f32, ())
 
 h = 1.0
@@ -39,7 +39,7 @@ grad_2 = ti.Vector.field(2, ti.f32, N)
 @ti.kernel
 def initialize():
     for i in range(N):
-        YoungsModulus[None] = 2e4
+        YoungsModulus[None] = 2e3
         origin[i] = ti.Vector([0.5, 0.5])
         pos_1[i] = center + ti.Vector([l_1 * ti.sin(pi), -l_1 * ti.cos(pi)])
         pos_2[i] = pos_1[i] + ti.Vector([l_2 * ti.sin(pi - delta*i/N), -l_2 * ti.cos(pi - delta*i/N)])
@@ -60,8 +60,8 @@ def compute_gradient():
         l1 = r_1.norm()
         l2 = r_2.norm()
 
-        k_1 = YoungsModulus[None]*l_1
-        k_2 = YoungsModulus[None]*l_2
+        k_1 = YoungsModulus[None]/l_1
+        k_2 = YoungsModulus[None]/l_2
 
         gradient_1 = k_1*(l1-l_1)*r_1/l1
         gradient_2 = k_2*(l2-l_2)*r_2/l2
